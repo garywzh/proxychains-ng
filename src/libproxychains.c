@@ -135,8 +135,6 @@ static void do_init(void) {
 	get_chain_data(proxychains_pd, &proxychains_proxy_count, &proxychains_ct);
 	DUMP_PROXY_CHAIN(proxychains_pd, proxychains_proxy_count);
 
-	proxychains_write_log(LOG_PREFIX "DLL init: proxychains-ng %s\n", proxychains_get_version());
-
 	setup_hooks();
 
 	while(close_fds_cnt) true_close(close_fds[--close_fds_cnt]);
