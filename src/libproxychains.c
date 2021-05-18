@@ -127,8 +127,18 @@ static void setup_hooks(void) {
 static int close_fds[16];
 static int close_fds_cnt = 0;
 
+static unsigned get_rand_seed(void) {
+#ifdef HAVE_CLOCK_GETTIME
+	struct timespec now;
+	clock_gettime(CLOCK_REALTIME, &now);
+	return now.tv_sec ^ now.tv_nsec;
+#else
+	return time(NULL);
+#endif
+}
+
 static void do_init(void) {
-	srand(time(NULL));
+	srand(get_rand_seed());
 	core_initialize();
 
 	/* read the config file */
@@ -352,6 +362,8 @@ inv_host:
 
 				if(!strcmp(type, "http")) {
 					pd[count].pt = HTTP_TYPE;
+				} else if(!strcmp(type, "raw")) {
+					pd[count].pt = RAW_TYPE;
 				} else if(!strcmp(type, "socks4")) {
 					pd[count].pt = SOCKS4_TYPE;
 				} else if(!strcmp(type, "socks5")) {
@@ -592,7 +604,7 @@ int connect(int sock, const struct sockaddr *addr, unsigned int len) {
 
 	// more specific first
 	if (!v6) for(i = 0; i < num_dnats && !remote_dns_connect && !dnat; i++)
-		if((dnats[i].orig_dst.s_addr == p_addr_in->s_addr))
+		if(dnats[i].orig_dst.s_addr == p_addr_in->s_addr)
 			if(dnats[i].orig_port && (dnats[i].orig_port == port))
 				dnat = &dnats[i];
 
